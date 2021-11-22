@@ -57,3 +57,20 @@ export const mapCallEventToDescription = (callEvent: CallEvent) => {
     }
     return description;
 }
+
+export const mapEvent2Comment = (
+    callEvent: CallEvent,
+): string => {
+    const { direction, from, to, channel } = callEvent;
+    const date = moment(Number(callEvent.start));
+    const duration = formatDuration(callEvent.end - callEvent.start);
+    const directionInfo = direction === CallDirection.IN ? "Eingehender" : "Ausgehender";
+    return `${directionInfo} CLINQ Anruf in channel ${channel.name} am ${date.format("DD.MM.YYYY")} (${duration})`;
+};
+
+function formatDuration(ms: number): string {
+    const duration = moment.duration(ms);
+    const minutes = Math.floor(duration.asMinutes());
+    const seconds = duration.seconds() < 10 ? `0${duration.seconds()}` : duration.seconds();
+    return `${minutes}:${seconds} min`;
+}
