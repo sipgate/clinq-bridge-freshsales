@@ -1,8 +1,7 @@
 import axios from "axios";
-import {infoLogger, warnLogger} from "./logger";
-import {CallDirection, CallEvent, Config} from "@clinq/bridge";
-import {parsePhoneNumber, normalizePhoneNumber} from "./phone-numbers";
-import {mapEvent2Comment} from "./mapper";
+import {infoLogger} from "./logger";
+import {CallDirection, CallEvent} from "@clinq/bridge";
+import {normalizePhoneNumber, parsePhoneNumber} from "./phone-numbers";
 
 export async function getAllContactsViewID(apiKey: string, apiUrl: string) {
     infoLogger(apiKey, `Fetching filters. Looking for 'All Contacts' filter`);

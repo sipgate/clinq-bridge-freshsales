@@ -1,10 +1,5 @@
-import {Adapter, Config, Contact, start, CallEvent, CallDirection, OAuthURLConfig} from "@clinq/bridge";
-import {
-    createCallLog,
-    getAllContacts,
-    getAllContactsViewID,
-    searchContactByPhonenumber
-} from './utils/freshsales'
+import {Adapter, CallDirection, CallEvent, Config, Contact, start} from "@clinq/bridge";
+import {createCallLog, getAllContacts, getAllContactsViewID, searchContactByPhonenumber} from './utils/freshsales'
 import {mapEvent2Comment, mapFreshsalesContact2ClinqContact} from "./utils/mapper";
 import {infoLogger, warnLogger} from "./utils/logger";
 
