@@ -4,14 +4,14 @@ import {sanitizePhonenumber} from "./phone-numbers";
 
 export const mapFreshsalesContact2ClinqContact = (freshsalesContact: any, apiUrl: string) => {
     const phoneNumbers: PhoneNumber[] = [];
-    // vincere primary number -> clinq work number
+    // freshsales work number -> clinq work number
     if (freshsalesContact.work_number) {
         phoneNumbers.push({
             label: PhoneNumberLabel.WORK,
             phoneNumber: sanitizePhonenumber(freshsalesContact.work_number),
         });
     }
-    // vincere mobile number -> clinq mobile number
+    // freshsales mobile number -> clinq mobile number
     if (freshsalesContact.mobile_number) {
         phoneNumbers.push({
             label: PhoneNumberLabel.MOBILE,
