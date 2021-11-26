@@ -1,7 +1,8 @@
 import axios from "axios";
-import {infoLogger} from "./logger";
+import {errorLogger, infoLogger} from "./logger";
 import {CallDirection, CallEvent} from "@clinq/bridge";
 import {normalizePhoneNumber, parsePhoneNumber} from "./phone-numbers";
+import {ContactTemplate} from "@clinq/bridge/dist/models";
 
 export async function getAllContactsViewID(apiKey: string, apiUrl: string) {
     infoLogger(apiKey, `Fetching filters. Looking for 'All Contacts' filter`);
@@ -11,6 +12,7 @@ export async function getAllContactsViewID(apiKey: string, apiUrl: string) {
         });
     const allContactsFilter = allFilters.data.filters.filter((entry: any) => entry.name === 'All Contacts')
     if (!allContactsFilter || allContactsFilter.length !== 1) {
+        errorLogger(apiKey, "Could not identify 'All Contacts' filter, needed for fetching all contacts.")
         throw new Error("Could not identify 'All Contacts' filter")
     }
     return allContactsFilter[0].id
@@ -81,4 +83,22 @@ export async function createCallLog(apiKey: string, apiUrl: string, event: CallE
     const commentResponse = await axios.post(apiUrl + `/phone_calls`, payload,
         {headers: {"Authorization": `Token token=${apiKey}`},});
     return commentResponse
+}
+
+export async function createFreshsaleContact(apiKey: string, apiUrl: string, contact: {}) {
+    const response = await axios.post(apiUrl + `/contacts`, contact,
+        {headers: {"Authorization": `Token token=${apiKey}`},});
+    return response.data.contact;
+}
+
+export async function updateFreshsaleContact(apiKey: string, apiUrl: string, contact: {}, id: string) {
+    const response = await axios.put(apiUrl + `/contacts/${id}`, contact,
+        {headers: {"Authorization": `Token token=${apiKey}`},});
+    return response.data.contact;
+}
+
+export async function forgetFreshsaleContact(apiKey: string, apiUrl: string, id: string) {
+    const response = await axios.delete(apiUrl + `/contacts/${id}/forget`,
+        {headers: {"Authorization": `Token token=${apiKey}`},});
+    return response.data;
 }

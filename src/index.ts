@@ -1,7 +1,18 @@
-import {Adapter, CallDirection, CallEvent, Config, Contact, start} from "@clinq/bridge";
-import {createCallLog, getAllContacts, getAllContactsViewID, searchContactByPhonenumber} from './utils/freshsales'
-import {mapEvent2Comment, mapFreshsalesContact2ClinqContact} from "./utils/mapper";
-import {infoLogger, warnLogger} from "./utils/logger";
+import {Adapter, CallDirection, CallEvent, Config, Contact, ServerError, start} from "@clinq/bridge";
+import {
+    createCallLog,
+    createFreshsaleContact, forgetFreshsaleContact,
+    getAllContacts,
+    getAllContactsViewID,
+    searchContactByPhonenumber, updateFreshsaleContact
+} from './utils/freshsales'
+import {
+    mapClinqContactTemplate2FreshsaleContact,
+    mapEvent2Comment,
+    mapFreshsalesContact2ClinqContact
+} from "./utils/mapper";
+import {errorLogger, infoLogger, warnLogger} from "./utils/logger";
+import {ContactTemplate, ContactUpdate} from "@clinq/bridge/dist/models";
 
 
 class FreshsalesAdapter implements Adapter {
@@ -30,6 +41,44 @@ class FreshsalesAdapter implements Adapter {
         const allContacts = await getAllContacts(config.apiKey, config.apiUrl, viewId)
         const clinqContacts: Contact[] = allContacts.map(freshSaleContact => mapFreshsalesContact2ClinqContact(freshSaleContact, config.apiUrl));
         return clinqContacts;
+    }
+
+    public async createContact(config: Config, contact: ContactTemplate): Promise<Contact> {
+        try {
+            const freshSalesContact = mapClinqContactTemplate2FreshsaleContact(contact);
+            const response = await createFreshsaleContact(config.apiKey, config.apiUrl, freshSalesContact)
+            const clinqContact = mapFreshsalesContact2ClinqContact(response, config.apiUrl);
+            infoLogger(config.apiKey, `Created new contact ${clinqContact.id}`);
+            return clinqContact
+        } catch (error: any) {
+            const responseMessage = error.response?.data?.errors?.message?error.response.data.errors.message:error.message;
+            errorLogger(config.apiKey, `Could not create: ${responseMessage}`);
+            throw new ServerError(500, "Could not create contact");
+        }
+    }
+
+    public async updateContact(config: Config, id: string, contact: ContactUpdate): Promise<Contact>{
+        try {
+            const freshSalesContact = mapClinqContactTemplate2FreshsaleContact(contact);
+            const response = await updateFreshsaleContact(config.apiKey, config.apiUrl, freshSalesContact, id)
+            infoLogger(config.apiKey, `Updated contact ${id}`);
+            return mapFreshsalesContact2ClinqContact(response, config.apiUrl);
+        } catch (error: any) {
+            const responseMessage = error.response?.data?.errors?.message?error.response.data.errors.message:error.message;
+            errorLogger(config.apiKey, `Could not create: ${responseMessage}`);
+            throw new ServerError(500, "Could not create contact");
+        }
+    }
+
+    public async deleteContact(config: Config, id: string): Promise<void>{
+        try {
+            const response = await forgetFreshsaleContact(config.apiKey, config.apiUrl, id)
+            infoLogger(config.apiKey, `Deleted (forget) contact ${id}`);
+        } catch (error: any) {
+            const responseMessage = error.response?.data?.errors?.message?error.response.data.errors.message:error.message;
+            errorLogger(config.apiKey, `Could not create: ${responseMessage}`);
+            throw new ServerError(500, "Could not create contact");
+        }
     }
 }
 

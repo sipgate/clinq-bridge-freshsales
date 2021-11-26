@@ -1,6 +1,8 @@
 import {CallDirection, CallEvent, Contact, PhoneNumber, PhoneNumberLabel} from "@clinq/bridge";
 import * as moment from "moment";
 import {sanitizePhonenumber} from "./phone-numbers";
+import {ContactTemplate, ContactUpdate} from "@clinq/bridge/dist/models";
+const { v4: uuidv4 } = require('uuid');
 
 export const mapFreshsalesContact2ClinqContact = (freshsalesContact: any, apiUrl: string) => {
     const phoneNumbers: PhoneNumber[] = [];
@@ -19,9 +21,9 @@ export const mapFreshsalesContact2ClinqContact = (freshsalesContact: any, apiUrl
         });
     }
     const contactUrl = (new URL(apiUrl)).origin + '/crm/sales/contacts/' + freshsalesContact.id.toString();
-    const primaryOrganization = freshsalesContact.sales_accounts.filter((entry: any) => entry.is_primary)
+    const primaryOrganization = freshsalesContact.sales_accounts?freshsalesContact.sales_accounts.filter((entry: any) => entry.is_primary):'';
     const contact: Contact = {
-        id: freshsalesContact.id,
+        id: freshsalesContact.id.toString(),
         email: freshsalesContact.email,
         name: freshsalesContact.display_name,
         firstName: freshsalesContact.first_name,
@@ -50,3 +52,32 @@ function formatDuration(ms: number): string {
     const seconds = duration.seconds() < 10 ? `0${duration.seconds()}` : duration.seconds();
     return `${minutes}:${seconds} min`;
 }
+
+export const mapClinqContactTemplate2FreshsaleContact = (
+    contactTemplate: ContactTemplate,
+): {} => {
+    let mobile_number: any = null;
+    let work_number: any = null;
+    contactTemplate.phoneNumbers?.forEach(function(phoneNumber:PhoneNumber) {
+        if (phoneNumber.label === PhoneNumberLabel.MOBILE) {
+            mobile_number = phoneNumber.phoneNumber;
+        }
+        if (phoneNumber.label === PhoneNumberLabel.WORK) {
+            work_number = phoneNumber.phoneNumber;
+        }
+        if (phoneNumber.label === PhoneNumberLabel.HOME && !work_number) {
+            work_number = phoneNumber.phoneNumber;
+        }
+    })
+    return {'contact' :
+            {
+                'email': contactTemplate.email?contactTemplate.email: `thisIsNoRealEmailAdressButEmailIsMandatory@${uuidv4()}.com`,
+                'display_name': contactTemplate.name?contactTemplate.name: null,
+                'first_name': contactTemplate.firstName?contactTemplate.firstName:null,
+                'last_name': contactTemplate.lastName?contactTemplate.lastName:null,
+                'mobile_number': mobile_number,
+                'work_number': work_number
+            }
+    }
+};
+
