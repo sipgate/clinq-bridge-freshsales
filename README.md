@@ -6,17 +6,22 @@ The Freshsales API is described [here](https://developer.freshsales.io/api/)
 
 To run the integration you need a API Key. Get it from the Freshsales Site: "Personal Settings" -> "API Settings"
 
-For local development the follwoing environment variables must be set (use .env file, see envTemplate):
-* API_KEY - the API Key you get from the Freshsales seit
-* REDIS_URL_OFF (disable usage of redis -> in memory caching, ok for local development)
+For local development the API Key and API URL must be provided as Header:
+* "x-provider-key" is the Header for the API Key 
+* "x-provider-url" is the Header for the API URL
 
 This urls can be useful in local development.
 
-* http://localhost:8080/contacts 
+* GET http://localhost:8080/contacts 
   * trigger fetching contacts from Freshsales
-* http://localhost:8080/events/calls 
+* POST http://localhost:8080/events/calls 
   * trigger handling phone calls event, see example payload in callEvent.json
-
+* POST http://localhost:8080/contacts
+  * trigger creating contact
+* PUT http://localhost:8080/contacts
+  * trigger updating contact 
+* DELETE http://localhost:8080/contacts
+  * trigger deleting contact
 
 
 
