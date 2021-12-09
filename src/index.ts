@@ -1,10 +1,10 @@
 import {Adapter, CallDirection, CallEvent, Config, Contact, ServerError, start} from "@clinq/bridge";
 import {
     createCallLog,
-    createFreshsaleContact, forgetFreshsaleContact,
+    createFreshsaleContact, createSalesAccount, forgetFreshsaleContact,
     getAllContacts,
     getAllContactsViewID,
-    searchContactByPhonenumber, updateFreshsaleContact
+    searchContactByPhonenumber, searchSalesAccountId, updateFreshsaleContact
 } from './utils/freshsales'
 import {
     mapClinqContactTemplate2FreshsaleContact,
@@ -45,7 +45,11 @@ class FreshsalesAdapter implements Adapter {
 
     public async createContact(config: Config, contact: ContactTemplate): Promise<Contact> {
         try {
-            const freshSalesContact = mapClinqContactTemplate2FreshsaleContact(contact);
+            let salesAccountId = contact.organization?await searchSalesAccountId(config.apiKey, config.apiUrl,contact.organization):null;
+            if (contact.organization && !salesAccountId) {
+                salesAccountId = await createSalesAccount(config.apiKey, config.apiUrl, contact.organization)
+            }
+            const freshSalesContact = mapClinqContactTemplate2FreshsaleContact(contact, salesAccountId);
             const response = await createFreshsaleContact(config.apiKey, config.apiUrl, freshSalesContact)
             const clinqContact = mapFreshsalesContact2ClinqContact(response, config.apiUrl);
             infoLogger(config.apiKey, `Created new contact ${clinqContact.id}`);
@@ -59,7 +63,11 @@ class FreshsalesAdapter implements Adapter {
 
     public async updateContact(config: Config, id: string, contact: ContactUpdate): Promise<Contact>{
         try {
-            const freshSalesContact = mapClinqContactTemplate2FreshsaleContact(contact);
+            let salesAccountId = contact.organization?await searchSalesAccountId(config.apiKey, config.apiUrl,contact.organization):null;
+            if (contact.organization && !salesAccountId) {
+                salesAccountId = await createSalesAccount(config.apiKey, config.apiUrl, contact.organization)
+            }
+            const freshSalesContact = mapClinqContactTemplate2FreshsaleContact(contact, salesAccountId);
             const response = await updateFreshsaleContact(config.apiKey, config.apiUrl, freshSalesContact, id)
             infoLogger(config.apiKey, `Updated contact ${id}`);
             return mapFreshsalesContact2ClinqContact(response, config.apiUrl);
@@ -73,7 +81,7 @@ class FreshsalesAdapter implements Adapter {
     public async deleteContact(config: Config, id: string): Promise<void>{
         try {
             const response = await forgetFreshsaleContact(config.apiKey, config.apiUrl, id)
-            infoLogger(config.apiKey, `Deleted (forget) contact ${id}`);
+            infoLogger(config.apiKey, `Deleted (forgot) contact ${id}`);
         } catch (error: any) {
             const responseMessage = error.response?.data?.errors?.message?error.response.data.errors.message:error.message;
             errorLogger(config.apiKey, `Could not create: ${responseMessage}`);

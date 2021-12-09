@@ -55,6 +55,7 @@ function formatDuration(ms: number): string {
 
 export const mapClinqContactTemplate2FreshsaleContact = (
     contactTemplate: ContactTemplate,
+    salesAccountId: any
 ): {} => {
     let mobile_number: any = null;
     let work_number: any = null;
@@ -69,15 +70,32 @@ export const mapClinqContactTemplate2FreshsaleContact = (
             work_number = phoneNumber.phoneNumber;
         }
     })
-    return {'contact' :
-            {
-                'email': contactTemplate.email?contactTemplate.email: `thisIsNoRealEmailAdressButEmailIsMandatory@${uuidv4()}.com`,
-                'display_name': contactTemplate.name?contactTemplate.name: null,
-                'first_name': contactTemplate.firstName?contactTemplate.firstName:null,
-                'last_name': contactTemplate.lastName?contactTemplate.lastName:null,
-                'mobile_number': mobile_number,
-                'work_number': work_number
-            }
+    if (salesAccountId) {
+        return {
+            'contact':
+                {
+                    'email': contactTemplate.email ? contactTemplate.email : `thisIsNoRealEmailAdressButEmailIsMandatory@${uuidv4()}.com`,
+                    'display_name': contactTemplate.name ? contactTemplate.name : null,
+                    'first_name': contactTemplate.firstName ? contactTemplate.firstName : null,
+                    'last_name': contactTemplate.lastName ? contactTemplate.lastName : null,
+                    'mobile_number': mobile_number,
+                    'work_number': work_number,
+                    'sales_accounts': [{'id': salesAccountId, 'is_primary': true}]
+                }
+        }
+    }
+    else  {
+        return {
+            'contact':
+                {
+                    'email': contactTemplate.email ? contactTemplate.email : `thisIsNoRealEmailAdressButEmailIsMandatory@${uuidv4()}.com`,
+                    'display_name': contactTemplate.name ? contactTemplate.name : null,
+                    'first_name': contactTemplate.firstName ? contactTemplate.firstName : null,
+                    'last_name': contactTemplate.lastName ? contactTemplate.lastName : null,
+                    'mobile_number': mobile_number,
+                    'work_number': work_number
+                }
+        }
     }
 };
 

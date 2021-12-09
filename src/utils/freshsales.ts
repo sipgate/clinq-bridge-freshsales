@@ -90,6 +90,12 @@ export async function createFreshsaleContact(apiKey: string, apiUrl: string, con
         {headers: {"Authorization": `Token token=${apiKey}`},});
     return response.data.contact;
 }
+export async function createSalesAccount(apiKey: string, apiUrl: string, salesAccountName: string) {
+    const payload = {'sales_account': {'name': salesAccountName}}
+    const response = await axios.post(apiUrl + `/sales_accounts`, payload,
+        {headers: {"Authorization": `Token token=${apiKey}`},});
+    return response.data.sales_account.id;
+}
 
 export async function updateFreshsaleContact(apiKey: string, apiUrl: string, contact: {}, id: string) {
     const response = await axios.put(apiUrl + `/contacts/${id}`, contact,
@@ -101,4 +107,12 @@ export async function forgetFreshsaleContact(apiKey: string, apiUrl: string, id:
     const response = await axios.delete(apiUrl + `/contacts/${id}/forget`,
         {headers: {"Authorization": `Token token=${apiKey}`},});
     return response.data;
+}
+
+export async function searchSalesAccountId(apiKey: string, apiUrl: string, organizationName: string) {
+    const searchResponse = await axios.get(apiUrl + `/lookup?q=${organizationName}&f=name&entities=sales_account`,
+            {
+                headers: {"Authorization": `Token token=${apiKey}`},
+            });
+    return searchResponse.data.sales_accounts.sales_accounts.length?searchResponse.data.sales_accounts.sales_accounts[0].id:null;
 }
