@@ -6,18 +6,27 @@ const { v4: uuidv4 } = require('uuid');
 
 export const mapFreshsalesContact2ClinqContact = (freshsalesContact: any, apiUrl: string) => {
     const phoneNumbers: PhoneNumber[] = [];
+    const homeNumbers = freshsalesContact.phone_numbers.filter((entry:any) => entry.label==='Home')
+    const otherNumbers = homeNumbers.length?freshsalesContact.phone_numbers.filter((entry:any) => entry.value!==homeNumbers[0].value):freshsalesContact.phone_numbers
+    // freshsales mobile number -> clinq mobile number
+    if (homeNumbers.length || otherNumbers.length) {
+        phoneNumbers.push({
+            label: PhoneNumberLabel.HOME,
+            phoneNumber: homeNumbers.length?sanitizePhonenumber(homeNumbers[0].value):sanitizePhonenumber(otherNumbers.pop().value),
+        });
+    }
     // freshsales work number -> clinq work number
-    if (freshsalesContact.work_number) {
+    if (freshsalesContact.work_number || otherNumbers.length) {
         phoneNumbers.push({
             label: PhoneNumberLabel.WORK,
-            phoneNumber: sanitizePhonenumber(freshsalesContact.work_number),
+            phoneNumber: freshsalesContact.work_number?sanitizePhonenumber(freshsalesContact.work_number):sanitizePhonenumber(otherNumbers.pop().value),
         });
     }
     // freshsales mobile number -> clinq mobile number
-    if (freshsalesContact.mobile_number) {
+    if (freshsalesContact.mobile_number || otherNumbers.length) {
         phoneNumbers.push({
             label: PhoneNumberLabel.MOBILE,
-            phoneNumber: sanitizePhonenumber(freshsalesContact.mobile_number),
+            phoneNumber: freshsalesContact.mobile_number?sanitizePhonenumber(freshsalesContact.mobile_number):sanitizePhonenumber(otherNumbers.pop().value),
         });
     }
     const contactUrl = (new URL(apiUrl)).origin + '/crm/sales/contacts/' + freshsalesContact.id.toString();
