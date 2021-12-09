@@ -99,7 +99,8 @@ export async function createSalesAccount(apiKey: string, apiUrl: string, salesAc
 
 export async function updateFreshsaleContact(apiKey: string, apiUrl: string, contact: {}, id: string) {
     const response = await axios.put(apiUrl + `/contacts/${id}`, contact,
-        {headers: {"Authorization": `Token token=${apiKey}`},});
+        {headers: {"Authorization": `Token token=${apiKey}`},
+                params: {"include": "sales_accounts"}});
     return response.data.contact;
 }
 
