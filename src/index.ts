@@ -16,7 +16,9 @@ import {ContactTemplate, ContactUpdate} from "@clinq/bridge/dist/models";
 
 
 class FreshsalesAdapter implements Adapter {
+
     public async handleCallEvent(config: Config, event: CallEvent): Promise<void> {
+        infoLogger(config.apiKey, `handleCallEvent triggered`);
         const phoneNumber = event.direction === CallDirection.OUT ? event.to : event.from;
         const mobileNumberResponse = await searchContactByPhonenumber(config.apiKey, config.apiUrl, event,
             'mobile_number', phoneNumber);

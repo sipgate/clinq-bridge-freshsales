@@ -82,18 +82,21 @@ export async function createCallLog(apiKey: string, apiUrl: string, event: CallE
         "targetable": {"id": contactId.toString()}, "note": { "description": comment}}
     const commentResponse = await axios.post(apiUrl + `/phone_calls`, payload,
         {headers: {"Authorization": `Token token=${apiKey}`},});
+    infoLogger(apiKey, `created call log`);
     return commentResponse
 }
 
 export async function createFreshsaleContact(apiKey: string, apiUrl: string, contact: {}) {
     const response = await axios.post(apiUrl + `/contacts`, contact,
         {headers: {"Authorization": `Token token=${apiKey}`},});
+    infoLogger(apiKey, `created freshsale contact`);
     return response.data.contact;
 }
 export async function createSalesAccount(apiKey: string, apiUrl: string, salesAccountName: string) {
     const payload = {'sales_account': {'name': salesAccountName}}
     const response = await axios.post(apiUrl + `/sales_accounts`, payload,
         {headers: {"Authorization": `Token token=${apiKey}`},});
+    infoLogger(apiKey, `created sales account`);
     return response.data.sales_account.id;
 }
 
@@ -101,12 +104,14 @@ export async function updateFreshsaleContact(apiKey: string, apiUrl: string, con
     const response = await axios.put(apiUrl + `/contacts/${id}`, contact,
         {headers: {"Authorization": `Token token=${apiKey}`},
                 params: {"include": "sales_accounts"}});
+    infoLogger(apiKey, `updated freshsales account`);
     return response.data.contact;
 }
 
 export async function forgetFreshsaleContact(apiKey: string, apiUrl: string, id: string) {
     const response = await axios.delete(apiUrl + `/contacts/${id}/forget`,
         {headers: {"Authorization": `Token token=${apiKey}`},});
+    infoLogger(apiKey, `forgot freshsales account`);
     return response.data;
 }
 
